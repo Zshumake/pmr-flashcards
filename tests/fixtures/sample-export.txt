@@ -1,0 +1,11 @@
+#separator:tab
+#html:true
+#guid column:1
+#notetype column:2
+#deck column:3
+#tags column:6
+C[`+ILuy%v	Cloze deletion	z misc	{{c1::Dystonia}}: Movement disorder characterized by muscle contraction resulting in twisting, turning, and posturing
+Cq]{Kcl%%0	Cloze deletion	z misc	{{c1::Associated reactions}}: Abnormal contraction distant from the muscles involved in voluntary effort
+j/}g&~EXHK	Cloze deletion	z misc	{{c1::Clonus}}: Alternating muscle contraction and relaxation of agonist and antagonist muscles
+dUy~G>MOds	Cloze deletion	z misc	<b>{{c1::Tardieu Scale}}:</b><div>Evaluating muscles moving at different velocities</div><div>{{c2::quality of muscle reaction}} and {{c3::angle}} recorded.</div>	<div>back content</div>	tag1 tag2
+"Em,#%|7qO7"	Cloze deletion	z misc	"{{c1::Spastic dystonia}}<span style=""color: rgb(51, 51, 51);"">: Muscle contraction present at rest</span>"
