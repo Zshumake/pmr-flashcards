@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User } from "lucide-react";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 export function TopBar() {
   const router = useRouter();
@@ -40,6 +41,8 @@ export function TopBar() {
           PM&R Flashcards
         </span>
       </div>
+      <div className="flex items-center gap-3">
+        <OfflineIndicator />
       <DropdownMenu>
         <DropdownMenuTrigger
           className="flex size-9 items-center justify-center rounded-full border bg-muted transition-colors hover:bg-accent"
@@ -66,6 +69,7 @@ export function TopBar() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      </div>
     </header>
   );
 }

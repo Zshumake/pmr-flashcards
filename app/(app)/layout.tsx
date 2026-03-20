@@ -1,6 +1,7 @@
 import { TopBar } from "@/components/app-shell/top-bar";
 import { Sidebar } from "@/components/app-shell/sidebar";
 import { BottomNav } from "@/components/app-shell/bottom-nav";
+import { ShortcutHelp } from "@/components/ShortcutHelp";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,6 +17,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
       <BottomNav />
+      <ShortcutHelp />
     </div>
   );
 }
