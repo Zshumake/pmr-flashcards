@@ -128,3 +128,113 @@
     @apply font-sans;
   }
 }
+
+/* -----------------------------------------------------------------------
+   Cloze card styles
+   ----------------------------------------------------------------------- */
+
+.cloze-blank {
+  display: inline;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background-color: oklch(0.93 0.02 250);
+  border-bottom: 2px solid oklch(0.6 0.15 250);
+  color: oklch(0.4 0.1 250);
+  font-weight: 600;
+}
+.dark .cloze-blank {
+  background-color: oklch(0.3 0.04 250);
+  border-bottom-color: oklch(0.55 0.15 250);
+  color: oklch(0.8 0.1 250);
+}
+
+.cloze-answer {
+  display: inline;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background-color: oklch(0.93 0.05 145);
+  border-bottom: 2px solid oklch(0.55 0.18 145);
+  color: oklch(0.35 0.12 145);
+  font-weight: 700;
+}
+.dark .cloze-answer {
+  background-color: oklch(0.28 0.06 145);
+  border-bottom-color: oklch(0.5 0.16 145);
+  color: oklch(0.82 0.12 145);
+}
+
+/* -----------------------------------------------------------------------
+   Card content prose — styles for medical content (tables, lists, images)
+   ----------------------------------------------------------------------- */
+
+.card-content-prose {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.card-content-prose p {
+  margin-bottom: 0.5em;
+}
+
+.card-content-prose ul,
+.card-content-prose ol {
+  padding-left: 1.25em;
+  margin-bottom: 0.5em;
+}
+
+.card-content-prose ul {
+  list-style-type: disc;
+}
+
+.card-content-prose ol {
+  list-style-type: decimal;
+}
+
+.card-content-prose li {
+  margin-bottom: 0.25em;
+}
+
+.card-content-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  margin-bottom: 0.75em;
+}
+
+.card-content-prose th,
+.card-content-prose td {
+  border: 1px solid var(--border);
+  padding: 0.375rem 0.5rem;
+  text-align: left;
+}
+
+.card-content-prose th {
+  background-color: var(--muted);
+  font-weight: 600;
+}
+
+.card-content-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.375rem;
+  margin: 0.5em 0;
+}
+
+.card-content-prose b,
+.card-content-prose strong {
+  font-weight: 700;
+}
+
+.card-content-prose sub {
+  font-size: 0.75em;
+}
+
+.card-content-prose sup {
+  font-size: 0.75em;
+}
+
+/* Safe area padding for bottom-fixed elements on iOS */
+.safe-bottom {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
