@@ -72,6 +72,8 @@ async function createExamSession(formData: FormData) {
 // Page component
 // ---------------------------------------------------------------------------
 
+export const dynamic = "force-dynamic"
+
 export default function ExamPage() {
   return (
     <div className="flex flex-1 flex-col p-4 md:p-6">

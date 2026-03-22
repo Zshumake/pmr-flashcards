@@ -8,6 +8,8 @@ const DRILL_SIZE = 25 // target number of cards
 const WEAK_RATIO = 0.7 // 70% weak area cards
 const MAINTENANCE_RATIO = 0.3 // 30% maintenance cards
 
+export const dynamic = "force-dynamic"
+
 export default async function DrillPage() {
   const supabase = await createServerSupabaseClient()
   const now = new Date()

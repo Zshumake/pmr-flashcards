@@ -31,8 +31,20 @@ const STATE_LABELS: Record<number, string> = {
 // Page
 // ---------------------------------------------------------------------------
 
+export const dynamic = "force-dynamic"
+
 export default async function DashboardPage() {
-  const supabase = await createServerSupabaseClient()
+  let supabase
+  try {
+    supabase = await createServerSupabaseClient()
+  } catch (e) {
+    return (
+      <div className="mx-auto max-w-4xl p-8 text-center">
+        <h1 className="font-heading text-2xl font-semibold">Dashboard</h1>
+        <p className="mt-4 text-muted-foreground">Unable to connect to the database. Please check your environment variables.</p>
+      </div>
+    )
+  }
   const now = new Date()
   const todayStart = new Date(now)
   todayStart.setHours(0, 0, 0, 0)

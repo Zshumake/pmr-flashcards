@@ -12,6 +12,8 @@ const DEFAULTS = {
   exam_time_multiplier: "1",
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function SettingsPage() {
   const supabase = await createServerSupabaseClient()
   // Single-user mode: use fixed UUID. When auth is re-enabled, use user.id.
