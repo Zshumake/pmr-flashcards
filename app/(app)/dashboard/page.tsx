@@ -5,9 +5,8 @@ import {
   getWeakTopics,
   type TopicAccuracy,
 } from "@/lib/analytics"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { TopicHeatmap } from "@/components/TopicHeatmap"
 import {
   ReviewHistoryChart,
@@ -16,7 +15,6 @@ import {
   type CardStateDistribution,
 } from "@/components/Charts"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 
 // ---------------------------------------------------------------------------
 // State label mapping
@@ -212,97 +210,130 @@ export default async function DashboardPage() {
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      {/* Readiness Score */}
-      <Card>
-        <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
-          <p className="text-sm font-medium text-muted-foreground">
-            Board Readiness
-          </p>
-          <p className="text-5xl font-bold tabular-nums">{readinessScore}</p>
-          <p className="text-xs text-muted-foreground">out of 100</p>
-          <ReadinessBar score={readinessScore} />
-        </CardContent>
-      </Card>
+    <div className="mx-auto max-w-4xl space-y-8 p-4 md:p-8">
+      {/* Header */}
+      <div className="animate-fade-up">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Your PM&R board preparation at a glance.
+        </p>
+      </div>
 
-      {/* Daily Stats */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard label="Today" value={todayReviews} />
-        <StatCard label="Streak" value={`${streak}d`} />
-        <StatCard label="Due" value={dueCards} />
-        <StatCard label="Total Cards" value={totalCards} />
+      {/* Readiness + Stats row */}
+      <div className="grid gap-4 md:grid-cols-5 stagger-children">
+        {/* Readiness Score — hero card */}
+        <Card className="md:col-span-2">
+          <CardContent className="flex flex-col items-center gap-3 py-8 text-center">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-widest text-muted-foreground">
+              Board Readiness
+            </p>
+            <p className="font-heading text-6xl font-bold tabular-nums tracking-tight">
+              {readinessScore}
+            </p>
+            <ReadinessBar score={readinessScore} />
+          </CardContent>
+        </Card>
+
+        {/* Stat cards */}
+        <StatCard label="Reviewed Today" value={todayReviews} />
+        <StatCard label="Day Streak" value={`${streak}`} />
+        <StatCard label="Due Now" value={dueCards} accent />
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-2">
-        <Button render={<Link href="/review" />} className="flex-1">
+      <div className="flex gap-3">
+        <Link
+          href="/review"
+          className="flex h-11 flex-1 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
+        >
           Review Due Cards
-        </Button>
+        </Link>
         {weakTopics.length > 0 && (
-          <Button
-            render={<Link href="/drill" />}
-            variant="outline"
-            className="flex-1"
+          <Link
+            href="/drill"
+            className="flex h-11 flex-1 items-center justify-center rounded-lg border border-border bg-card font-semibold text-sm transition-all hover:bg-accent active:scale-[0.98]"
           >
             Drill Weak Areas
-          </Button>
+          </Link>
         )}
       </div>
 
-      <Separator />
-
       {/* Topic Heatmap */}
-      <Card>
-        <CardContent>
-          <TopicHeatmap
-            data={topicAccuracyData.map((t) => ({
-              topic: t.topic,
-              accuracy: t.accuracy,
-              totalCount: t.totalCount,
-              correctCount: t.correctCount,
-            }))}
-          />
-        </CardContent>
-      </Card>
+      <section>
+        <h2 className="mb-3 font-heading text-lg font-semibold tracking-tight">
+          Topic Mastery
+        </h2>
+        <Card>
+          <CardContent className="pt-4">
+            <TopicHeatmap
+              data={topicAccuracyData.map((t) => ({
+                topic: t.topic,
+                accuracy: t.accuracy,
+                totalCount: t.totalCount,
+                correctCount: t.correctCount,
+              }))}
+            />
+          </CardContent>
+        </Card>
+      </section>
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardContent>
-            <ReviewHistoryChart data={reviewHistory} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <CardStatePieChart data={cardStateDistribution} />
-          </CardContent>
-        </Card>
+        <section>
+          <h2 className="mb-3 font-heading text-lg font-semibold tracking-tight">
+            Review History
+          </h2>
+          <Card>
+            <CardContent className="pt-4">
+              <ReviewHistoryChart data={reviewHistory} />
+            </CardContent>
+          </Card>
+        </section>
+        <section>
+          <h2 className="mb-3 font-heading text-lg font-semibold tracking-tight">
+            Card Distribution
+          </h2>
+          <Card>
+            <CardContent className="pt-4">
+              <CardStatePieChart data={cardStateDistribution} />
+            </CardContent>
+          </Card>
+        </section>
       </div>
 
-      {/* Weak Topics Summary */}
+      {/* Weak Topics */}
       {weakTopics.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Weakest Topics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {weakTopics.map((t) => (
-                <Badge key={t.topic} variant="outline">
-                  {t.topic} - {Math.round(t.accuracy * 100)}%
-                </Badge>
-              ))}
-            </div>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Use{" "}
-              <Link href="/drill" className="underline underline-offset-2">
-                Drill Mode
-              </Link>{" "}
-              to target these areas with focused practice.
-            </p>
-          </CardContent>
-        </Card>
+        <section>
+          <h2 className="mb-3 font-heading text-lg font-semibold tracking-tight">
+            Areas to Focus
+          </h2>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex flex-wrap gap-2">
+                {weakTopics.map((t) => (
+                  <Badge key={t.topic} variant="outline" className="text-sm">
+                    {t.topic} — {Math.round(t.accuracy * 100)}%
+                  </Badge>
+                ))}
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Use{" "}
+                <Link href="/drill" className="font-medium text-primary underline underline-offset-2">
+                  Drill Mode
+                </Link>{" "}
+                to target these areas with focused practice.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
       )}
+
+      {/* Footer stat */}
+      <p className="pb-4 text-center text-xs text-muted-foreground">
+        {totalCards.toLocaleString()} total cards &middot; {cardsSeen.toLocaleString()} seen
+      </p>
     </div>
   )
 }
@@ -314,28 +345,35 @@ export default async function DashboardPage() {
 function StatCard({
   label,
   value,
+  accent = false,
 }: {
   label: string
   value: number | string
+  accent?: boolean
 }) {
   return (
-    <Card size="sm">
-      <CardContent>
-        <p className="text-2xl font-bold tabular-nums">{value}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
+    <Card>
+      <CardContent className="flex flex-col items-center justify-center py-6 text-center">
+        <p className={`text-3xl font-bold tabular-nums ${accent ? "text-primary" : ""}`}>
+          {value}
+        </p>
+        <p className="mt-1 text-[0.6875rem] font-medium uppercase tracking-widest text-muted-foreground">
+          {label}
+        </p>
       </CardContent>
     </Card>
   )
 }
 
 function ReadinessBar({ score }: { score: number }) {
-  let colorClass = "bg-orange-500"
-  if (score >= 70) colorClass = "bg-blue-500"
-  else if (score >= 40) colorClass = "bg-amber-400"
+  // Warm palette: copper → amber → sage green
+  let colorClass = "bg-destructive/80"
+  if (score >= 70) colorClass = "bg-primary"
+  else if (score >= 40) colorClass = "bg-amber-500"
 
   return (
     <div
-      className="mt-1 h-2 w-full max-w-xs overflow-hidden rounded-full bg-muted"
+      className="mt-2 h-1.5 w-full max-w-[200px] overflow-hidden rounded-full bg-muted"
       role="progressbar"
       aria-valuenow={score}
       aria-valuemin={0}
@@ -343,7 +381,7 @@ function ReadinessBar({ score }: { score: number }) {
       aria-label={`Board readiness score: ${score} out of 100`}
     >
       <div
-        className={`h-full rounded-full transition-all ${colorClass}`}
+        className={`h-full rounded-full transition-all duration-700 ease-out ${colorClass}`}
         style={{ width: `${score}%` }}
       />
     </div>

@@ -37,23 +37,19 @@ async function createExamSession(formData: FormData) {
   "use server"
 
   const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/login")
-  }
 
   const questionCount = Number(formData.get("questionCount")) || 25
   const timeMultiplier = formData.get("timeMultiplier") as string
   const selectedTopics = formData.getAll("topics") as string[]
 
+  // Single-user mode: use a fixed UUID. When auth is re-enabled, use user.id.
+  const userId = "00000000-0000-0000-0000-000000000001"
+
   // Create the study session
   const { data: session, error } = await supabase
     .from("study_sessions")
     .insert({
-      user_id: user.id,
+      user_id: userId,
       mode: "exam",
       topic_filter: selectedTopics.length > 0 ? selectedTopics : null,
       session_state: {

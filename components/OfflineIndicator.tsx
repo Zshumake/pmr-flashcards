@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Loader2, Wifi, WifiOff } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { initAutoSync } from "@/lib/sync"
@@ -10,11 +10,16 @@ export function OfflineIndicator() {
   const isOnline = useOfflineStore((s) => s.isOnline)
   const isSyncing = useOfflineStore((s) => s.isSyncing)
   const pendingCount = useOfflineStore((s) => s.pendingCount)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const cleanup = initAutoSync(() => createClient())
     return cleanup
   }, [])
+
+  // Render nothing on server to avoid hydration mismatch
+  if (!mounted) return null
 
   // Online and nothing pending -- show a subtle green dot
   if (isOnline && pendingCount === 0 && !isSyncing) {

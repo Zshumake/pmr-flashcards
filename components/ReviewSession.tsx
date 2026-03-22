@@ -6,8 +6,7 @@ import { useHotkeys } from "react-hotkeys-hook"
 import { useStores } from "@/stores/store-provider"
 import { FlashCard } from "@/components/FlashCard"
 import { RatingButtons } from "@/components/RatingButtons"
-import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
+
 import { createFsrsEngine, createNewCardState } from "@/lib/fsrs"
 import type { CardState, ScheduleResult } from "@/lib/fsrs"
 import { parseCloze } from "@/lib/card-parser"
@@ -173,7 +172,7 @@ export function ReviewSession({ initialCards }: ReviewSessionProps) {
           lapses: newState?.lapses ?? 0,
           card_state: newState?.card_state ?? 0,
           scheduled_days: newState?.scheduled_days ?? 0,
-          last_review: newState?.last_review?.toISOString() ?? new Date().toISOString(),
+          last_reviewed: newState?.last_review?.toISOString() ?? new Date().toISOString(),
         }
       })
 
@@ -185,7 +184,7 @@ export function ReviewSession({ initialCards }: ReviewSessionProps) {
       }))
 
       await Promise.all([
-        supabase.from("user_progress").upsert(progressRows, { onConflict: "card_id" }),
+        supabase.from("user_progress").upsert(progressRows, { onConflict: "user_id,card_id,cloze_index" }),
         supabase.from("review_log").insert(logRows),
       ])
     },
@@ -281,35 +280,40 @@ export function ReviewSession({ initialCards }: ReviewSessionProps) {
       : 0
 
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 p-4">
+      <div className="flex flex-1 flex-col items-center justify-center gap-8 p-6 animate-fade-up">
         <div className="text-center">
-          <h2 className="text-2xl font-bold tracking-tight">Session Complete</h2>
-          <p className="mt-2 text-muted-foreground">Great work studying!</p>
+          <h2 className="font-heading text-3xl font-semibold tracking-tight">
+            Session Complete
+          </h2>
+          <p className="mt-2 text-muted-foreground">
+            Nice work. Keep the momentum going.
+          </p>
         </div>
-        <div className="grid w-full max-w-xs grid-cols-3 gap-4 text-center">
-          <div>
-            <p className="text-2xl font-bold tabular-nums">{ratingsCount.total}</p>
-            <p className="text-xs text-muted-foreground">Cards</p>
+        <div className="grid w-full max-w-sm grid-cols-3 gap-6 text-center stagger-children">
+          <div className="rounded-lg bg-card p-4">
+            <p className="text-3xl font-bold tabular-nums">{ratingsCount.total}</p>
+            <p className="mt-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">Questions</p>
           </div>
-          <div>
-            <p className="text-2xl font-bold tabular-nums">{accuracy}%</p>
-            <p className="text-xs text-muted-foreground">Recall</p>
+          <div className="rounded-lg bg-card p-4">
+            <p className="text-3xl font-bold tabular-nums">{accuracy}%</p>
+            <p className="mt-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">Recall</p>
           </div>
-          <div>
-            <p className="text-2xl font-bold tabular-nums">
-              {minutes > 0 ? `${minutes}m` : ""}{seconds}s
+          <div className="rounded-lg bg-card p-4">
+            <p className="text-3xl font-bold tabular-nums">
+              {minutes > 0 ? `${minutes}m ` : ""}{seconds}s
             </p>
-            <p className="text-xs text-muted-foreground">Time</p>
+            <p className="mt-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">Time</p>
           </div>
         </div>
-        <Button
-          className="mt-4 h-12 w-full max-w-xs"
+        <button
+          type="button"
+          className="h-12 w-full max-w-sm rounded-lg bg-primary text-primary-foreground font-semibold text-base transition-all duration-150 hover:opacity-90 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           onClick={() => {
             window.location.reload()
           }}
         >
-          Start New Session
-        </Button>
+          Continue Studying
+        </button>
       </div>
     )
   }
@@ -332,18 +336,30 @@ export function ReviewSession({ initialCards }: ReviewSessionProps) {
 
   return (
     <div className="flex flex-1 flex-col">
-      {/* Progress bar */}
-      <div className="px-3 pt-2 pb-1">
-        <Progress value={progressPercent}>
-          <ProgressLabel className="text-xs text-muted-foreground">
-            {ratingsCount.total}/{queue.length}
-          </ProgressLabel>
-          <ProgressValue className="text-xs" />
-        </Progress>
+      {/* Progress strip */}
+      <div className="flex items-center gap-3 px-4 pt-3 pb-1 md:px-8 max-w-3xl w-full mx-auto">
+        <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-primary/70 transition-all duration-500 ease-out"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+        <span className="text-xs tabular-nums text-muted-foreground font-medium">
+          {ratingsCount.total} / {queue.length}
+        </span>
       </div>
 
-      {/* Flashcard area */}
-      <div className="flex flex-1 flex-col gap-2 px-3 pt-1 pb-2">
+      {/* Topic label */}
+      {currentCard.topic && (
+        <div className="px-4 pt-1 md:px-8 max-w-3xl w-full mx-auto">
+          <span className="text-[0.6875rem] font-medium uppercase tracking-widest text-primary/70">
+            {currentCard.topic}
+          </span>
+        </div>
+      )}
+
+      {/* Question & answer area */}
+      <div className="flex flex-1 flex-col px-4 pt-4 pb-2 md:px-8 md:pt-6 max-w-3xl w-full mx-auto">
         <FlashCard
           html={currentCard.front_html}
           clozes={clozes}
@@ -353,21 +369,25 @@ export function ReviewSession({ initialCards }: ReviewSessionProps) {
         />
       </div>
 
-      {/* Rating buttons - fixed at bottom */}
-      <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border pt-2 safe-bottom">
+      {/* Actions — fixed at bottom */}
+      <div className="sticky bottom-0 bg-background/90 backdrop-blur-md border-t border-border/60 pt-2 safe-bottom max-w-3xl w-full mx-auto">
         {isFlipped ? (
           <RatingButtons
             onRate={handleRate}
             intervals={intervals}
           />
         ) : (
-          <div className="px-2 pb-2">
-            <Button
-              className="h-12 w-full text-base"
+          <div className="px-3 pb-3">
+            <button
+              type="button"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold text-base transition-all duration-150 hover:opacity-90 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               onClick={flipCard}
             >
-              Show Answer
-            </Button>
+              Reveal Answer
+              <kbd className="hidden rounded border border-primary-foreground/20 px-1.5 py-0.5 font-mono text-[0.625rem] font-normal opacity-60 md:inline">
+                space
+              </kbd>
+            </button>
           </div>
         )}
       </div>

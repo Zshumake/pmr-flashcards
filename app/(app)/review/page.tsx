@@ -12,7 +12,7 @@ export default async function ReviewPage({
   const supabase = await createServerSupabaseClient()
   const now = new Date().toISOString()
 
-  // Build query: cards that are due or have never been studied (new)
+  // Fetch cards with their progress (left join — cards without progress are "new")
   let query = supabase
     .from("cards")
     .select(
@@ -30,22 +30,30 @@ export default async function ReviewPage({
         lapses,
         card_state,
         scheduled_days,
-        last_review
+        last_reviewed
       )
     `
     )
-    .or(`user_progress.is.null,user_progress.due.lte.${now}`)
-    .limit(SESSION_SIZE)
 
   if (topic && typeof topic === "string") {
     query = query.eq("topic", topic)
   }
 
-  const { data: cards, error } = await query
+  const { data: allCards, error } = await query
 
   if (error) {
     throw new Error(`Failed to fetch review cards: ${error.message}`)
   }
+
+  // Filter to cards that are new (no progress) or due
+  const cards = (allCards ?? []).filter((card) => {
+    const progress = Array.isArray(card.user_progress)
+      ? card.user_progress[0]
+      : card.user_progress
+    if (!progress) return true // new card
+    if (!progress.due) return true
+    return new Date(progress.due) <= new Date(now)
+  }).slice(0, SESSION_SIZE)
 
   // Flatten join data into ReviewCardData shape
   const reviewCards: ReviewCardData[] = (cards ?? []).map((card) => {
@@ -67,7 +75,7 @@ export default async function ReviewPage({
       lapses: progress?.lapses ?? null,
       card_state: progress?.card_state ?? null,
       scheduled_days: progress?.scheduled_days ?? null,
-      last_review: progress?.last_review ?? null,
+      last_review: progress?.last_reviewed ?? null,
     }
   })
 

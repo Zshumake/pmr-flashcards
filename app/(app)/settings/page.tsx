@@ -14,17 +14,16 @@ const DEFAULTS = {
 
 export default async function SettingsPage() {
   const supabase = await createServerSupabaseClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Single-user mode: use fixed UUID. When auth is re-enabled, use user.id.
+  const userId = "00000000-0000-0000-0000-000000000001"
 
   let settings = DEFAULTS
 
-  if (user) {
+  {
     const { data } = await supabase
       .from("user_settings")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .single()
 
     if (data) {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +33,7 @@ const registerSchema = z
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -57,7 +59,9 @@ export default function RegisterPage() {
         return;
       }
 
-      setIsSuccess(true);
+      // With email confirmation disabled, signUp auto-signs in
+      router.push("/dashboard");
+      router.refresh();
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {

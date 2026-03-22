@@ -1,14 +1,18 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self'",
+      isDev
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+        : "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' https://*.supabase.co",
-      "connect-src 'self' https://*.supabase.co",
+      "img-src 'self' https://*.supabase.co data:",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
       "frame-src 'none'",
       "object-src 'none'",
     ].join("; "),
@@ -33,6 +37,15 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   async headers() {
+    // Skip CSP in dev — Turbopack injects scripts that CSP blocks
+    if (isDev) {
+      return [
+        {
+          source: "/(.*)",
+          headers: securityHeaders.filter((h) => h.key !== "Content-Security-Policy"),
+        },
+      ];
+    }
     return [
       {
         source: "/(.*)",

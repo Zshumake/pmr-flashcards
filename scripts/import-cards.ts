@@ -10,8 +10,8 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync, readdirSync } from 'fs'
-import { join, resolve } from 'path'
-import { parseAnkiFile } from '../lib/import-parser'
+import { basename, join, resolve } from 'path'
+import { deriveTopic, parseAnkiFile } from '../lib/import-parser'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -29,22 +29,33 @@ const BATCH_SIZE = 100
 
 async function importFile(filePath: string): Promise<number> {
   const content = readFileSync(filePath, 'utf-8')
-  const cards = parseAnkiFile(content)
+  // Derive topic from filename: "z CVA.txt" -> "CVA"
+  const filename = basename(filePath, '.txt')
+  const filenameTopic = deriveTopic(filename)
+  const cards = parseAnkiFile(content, filenameTopic)
 
   if (cards.length === 0) {
     console.log(`  Skipping ${filePath} — no cards found`)
     return 0
   }
 
+  // Deduplicate by anki_guid (Format B generates MD5-based guids that may collide)
+  const seen = new Set<string>()
+  const uniqueCards = cards.filter(card => {
+    if (seen.has(card.anki_guid)) return false
+    seen.add(card.anki_guid)
+    return true
+  })
+
   let imported = 0
 
-  for (let i = 0; i < cards.length; i += BATCH_SIZE) {
-    const batch = cards.slice(i, i + BATCH_SIZE).map(card => ({
+  for (let i = 0; i < uniqueCards.length; i += BATCH_SIZE) {
+    const batch = uniqueCards.slice(i, i + BATCH_SIZE).map(card => ({
       anki_guid: card.anki_guid,
       topic: card.topic,
       front_html: card.front_html,
       back_html: card.back_html,
-      cloze_deletions: JSON.stringify(card.cloze_deletions),
+      cloze_deletions: card.cloze_deletions,
       plain_text: card.plain_text,
       tags: card.tags,
     }))

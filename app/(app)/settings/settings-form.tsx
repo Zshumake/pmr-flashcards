@@ -93,18 +93,12 @@ export function SettingsForm({ initialValues }: SettingsFormProps) {
 
   async function onSubmit(values: SettingsValues) {
     const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      toast.error("You must be signed in to save settings.")
-      return
-    }
+    // Single-user mode: use fixed UUID. When auth is re-enabled, use user.id.
+    const userId = "00000000-0000-0000-0000-000000000001"
 
     const { error } = await supabase.from("user_settings").upsert(
       {
-        user_id: user.id,
+        user_id: userId,
         ...values,
       },
       { onConflict: "user_id" }

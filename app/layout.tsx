@@ -1,18 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Source_Sans_3, Playfair_Display } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-sans",
+const body = Source_Sans_3({
+  variable: "--font-body",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const display = Playfair_Display({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "PM&R Flashcards",
+  title: "PM&R Board Study",
   description:
-    "Spaced-repetition flashcard app for PM&R board study",
+    "Spaced-repetition study system for PM&R board preparation",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -29,7 +36,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#2563eb",
+  themeColor: "#8B6914",
 };
 
 export default function RootLayout({
@@ -38,7 +45,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${body.variable} ${display.variable} h-full`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full flex flex-col antialiased font-sans">
         <a
           href="#main-content"
