@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation"
-import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { ExamConfigForm } from "./exam-config-form"
 
 // ---------------------------------------------------------------------------
@@ -36,36 +35,21 @@ const TIME_MULTIPLIERS = [
 async function createExamSession(formData: FormData) {
   "use server"
 
-  const supabase = await createServerSupabaseClient()
-
   const questionCount = Number(formData.get("questionCount")) || 25
   const timeMultiplier = formData.get("timeMultiplier") as string
   const selectedTopics = formData.getAll("topics") as string[]
 
-  // Single-user mode: use a fixed UUID. When auth is re-enabled, use user.id.
-  const userId = "00000000-0000-0000-0000-000000000001"
-
-  // Create the study session
-  const { data: session, error } = await supabase
-    .from("study_sessions")
-    .insert({
-      user_id: userId,
-      mode: "exam",
-      topic_filter: selectedTopics.length > 0 ? selectedTopics : null,
-      session_state: {
-        questionCount,
-        timeMultiplier,
-        selectedTopics,
-      },
-    })
-    .select("id")
-    .single()
-
-  if (error || !session) {
-    throw new Error("Failed to create exam session")
+  // Single-user mode: encode config in URL instead of creating a DB session
+  // (study_sessions table requires auth.users FK which we don't have)
+  const params = new URLSearchParams({
+    count: String(questionCount),
+    time: timeMultiplier,
+  })
+  if (selectedTopics.length > 0) {
+    params.set("topics", selectedTopics.join(","))
   }
 
-  redirect(`/exam/${session.id}`)
+  redirect(`/exam/session?${params.toString()}`)
 }
 
 // ---------------------------------------------------------------------------
