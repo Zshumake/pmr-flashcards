@@ -34,25 +34,6 @@ const STATE_LABELS: Record<number, string> = {
 export const dynamic = "force-dynamic"
 
 export default async function DashboardPage() {
-  try {
-    return await DashboardContent()
-  } catch (e) {
-    console.error("Dashboard error:", e)
-    return (
-      <div className="mx-auto max-w-4xl p-8 text-center">
-        <h1 className="font-heading text-2xl font-semibold">Dashboard</h1>
-        <p className="mt-4 text-muted-foreground">
-          Something went wrong loading the dashboard. Please try refreshing.
-        </p>
-        <p className="mt-2 text-xs text-muted-foreground/60">
-          {e instanceof Error ? e.message : "Unknown error"}
-        </p>
-      </div>
-    )
-  }
-}
-
-async function DashboardContent() {
   const supabase = await createServerSupabaseClient()
   const now = new Date()
   const todayStart = new Date(now)
